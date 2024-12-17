@@ -12,14 +12,6 @@ from portfolio_management.utils.helpers import (
     display_optimal_weights
 )
 
-def main():
-    st.title('Portfolio Management with Monte Carlo Simulation')
-
-    st.write("""
-    Welcome to the Portfolio Management application. Input your investment preferences below and run a Monte Carlo simulation to forecast potential portfolio performance.
-    """)
-
-    
 import os
 from dotenv import load_dotenv
 from portfolio_management.utils.alpha_vantage import get_alpha_vantage_tickers
@@ -36,8 +28,15 @@ def load_ticker_list():
     all_tickers = merge_tickers([alpha_vantage_tickers, nasdaq_nyse_tickers])
     return all_tickers
 
-ticker_list = load_ticker_list()
 
+def main():
+    st.title('Portfolio Management with Monte Carlo Simulation')
+
+    st.write("""
+    Welcome to the Portfolio Management application. Input your investment preferences below and run a Monte Carlo simulation to forecast potential portfolio performance.
+    """)
+
+    ticker_list = load_ticker_list()
 
     # Input: Stock Tickers
     st.header('1. Select Stocks and Date Range')
@@ -175,65 +174,29 @@ ticker_list = load_ticker_list()
             st.error('Failed to load stock data. Please check the tickers and date range.')
             return
 
-        # Create portfolio
         portfolio = Portfolio(stock_data)
         portfolio.calculate_returns()
-
-        # Annualize returns and covariance
         expected_returns = portfolio.returns.mean() * 252
         covariance_matrix = portfolio.returns.cov() * 252
 
-        # Determine weights
-        if investment_option == 'Use Weights and Initial Investment':
-            if optimize:
-                optimizer = PortfolioOptimizer(
-                    expected_returns,
-                    covariance_matrix,
-                    risk_free_rate=risk_free_rate
-                )
-                weights, sharpe = optimizer.optimize_weights(num_simulations=10000)
-                st.write(f"Optimized Portfolio Sharpe Ratio: {sharpe:.4f}")
-                st.subheader('Optimized Portfolio Weights:')
-                display_optimal_weights(tickers, weights, streamlit_display=True)
-            else:
-                st.subheader('Using Custom Weights:')
-                display_optimal_weights(tickers, weights, streamlit_display=True)
-        else:
-            # Weights have been calculated from dollar amounts
-            st.subheader('Calculated Weights from Dollar Amounts:')
+        if investment_option == 'Use Weights and Initial Investment' and optimize:
+            optimizer = PortfolioOptimizer(expected_returns, covariance_matrix, risk_free_rate=risk_free_rate)
+            weights, sharpe = optimizer.optimize_weights(num_simulations=10000)
+            st.write(f"Optimized Portfolio Sharpe Ratio: {sharpe:.4f}")
             display_optimal_weights(tickers, weights, streamlit_display=True)
-            st.write(f"**Total Investment Amount:** ${initial_investment:.2f}")
+        else:
+            display_optimal_weights(tickers, weights, streamlit_display=True)
 
-        # Perform Monte Carlo Simulation
         simulation = MonteCarloSimulation(portfolio.returns, initial_investment, weights)
-        all_cumulative_returns, final_portfolio_values = simulation.run_simulation(
-            int(num_simulations), int(time_horizon)
-        )
+        all_cumulative_returns, final_portfolio_values = simulation.run_simulation(int(num_simulations), int(time_horizon))
 
-        # Display Results
         st.header('4. Simulation Results')
-        st.subheader('Monte Carlo Simulation Insights:')
         insights = get_simulation_insights(final_portfolio_values, initial_investment)
         for key, value in insights.items():
             st.write(f"**{key}:** {value}")
 
-        # Plot results
-        st.subheader('Interactive Plots')
         plot_interactive_simulation_results(all_cumulative_returns, final_portfolio_values, end_date)
+
 
 if __name__ == '__main__':
     main()
-
-# After weight optimization:
-sector_data = data_loader.get_sector_data(tickers)
-sector_weights = {}
-for ticker, weight in zip(tickers, weights):
-    sector = sector_data[ticker]
-    sector_weights[sector] = sector_weights.get(sector, 0) + weight
-
-st.subheader('Sector Allocation:')
-sector_df = pd.DataFrame({
-    'Sector': sector_weights.keys(),
-    'Weight': sector_weights.values()
-})
-st.dataframe(sector_df)
