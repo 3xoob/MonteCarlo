@@ -20,21 +20,20 @@ from portfolio_management.utils.utils import merge_tickers
 
 load_dotenv()
 
-@st.cache_data
-def load_ticker_list():
-    st.write("Extracting tickers using the new method...")
-    alpha_vantage_tickers = get_alpha_vantage_tickers()
-    nasdaq_nyse_tickers = get_nasdaq_nyse_tickers()
-    all_tickers = merge_tickers([alpha_vantage_tickers, nasdaq_nyse_tickers])
-    return all_tickers
-
-
 def main():
     st.title('Portfolio Management with Monte Carlo Simulation')
 
     st.write("""
     Welcome to the Portfolio Management application. Input your investment preferences below and run a Monte Carlo simulation to forecast potential portfolio performance.
     """)
+
+    @st.cache_data
+    def load_ticker_list():
+        st.write("Extracting tickers using the new method...")
+        alpha_vantage_tickers = get_alpha_vantage_tickers()
+        nasdaq_nyse_tickers = get_nasdaq_nyse_tickers()
+        all_tickers = merge_tickers([alpha_vantage_tickers, nasdaq_nyse_tickers])
+        return all_tickers
 
     ticker_list = load_ticker_list()
 
@@ -200,3 +199,18 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# After weight optimization:
+sector_data = data_loader.get_sector_data(tickers)
+sector_weights = {}
+for ticker, weight in zip(tickers, weights):
+    sector = sector_data[ticker]
+    sector_weights[sector] = sector_weights.get(sector, 0) + weight
+
+st.subheader('Sector Allocation:')
+sector_df = pd.DataFrame({
+    'Sector': sector_weights.keys(),
+    'Weight': sector_weights.values()
+})
+st.dataframe(sector_df)
