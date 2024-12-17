@@ -89,28 +89,10 @@ def get_simulation_insights(sim_results, initial_investment):
     }
     return insights
 
-import pandas as pd
-
 def display_optimal_weights(tickers, weights, streamlit_display=False):
-    """Display optimal weights for a given set of tickers and their associated weights."""
-    
-    # Debug step to display lengths of tickers and weights
-    if len(tickers) != len(weights):
-        print(f"Mismatch in tickers and weights. Tickers length: {len(tickers)}, Weights length: {len(weights)}")
-    
-    # Ensure tickers and weights have the same length
-    if len(tickers) != len(weights):
-        min_len = min(len(tickers), len(weights))
-        tickers = tickers[:min_len]
-        weights = weights[:min_len]
-
     weights_df = pd.DataFrame({'Ticker': tickers, 'Weight': weights})
-    
+    weights_df['Weight'] = weights_df['Weight'].map("{:.4f}".format)
     if streamlit_display:
-        import streamlit as st
-        st.write("### Optimal Weights")
-        st.dataframe(weights_df)
+        st.table(weights_df)
     else:
         print(weights_df)
-        
-    return weights_df
