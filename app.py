@@ -201,17 +201,20 @@ if __name__ == '__main__':
     main()
 
 
-from portfolio_management.data.data_loader import DataLoader
-data_loader = DataLoader()
-sector_data = data_loader.get_sector_data(tickers)
-sector_weights = {}
-for ticker, weight in zip(tickers, weights):
-    sector = sector_data[ticker]
-    sector_weights[sector] = sector_weights.get(sector, 0) + weight
+if 'tickers' in locals() and 'weights' in locals():
+    from portfolio_management.data.data_loader import DataLoader
+    data_loader = DataLoader()
+    sector_data = data_loader.get_sector_data(tickers)
+    sector_weights = {}
+    for ticker, weight in zip(tickers, weights):
+        sector = sector_data.get(ticker, 'Unknown')  # Safe access for missing data
+        sector_weights[sector] = sector_weights.get(sector, 0) + weight
 
-st.subheader('Sector Allocation:')
-sector_df = pd.DataFrame({
-    'Sector': sector_weights.keys(),
-    'Weight': sector_weights.values()
-})
-st.dataframe(sector_df)
+    st.subheader('Sector Allocation:')
+    sector_df = pd.DataFrame({
+        'Sector': sector_weights.keys(),
+        'Weight': sector_weights.values()
+    })
+    st.dataframe(sector_df)
+else:
+    st.warning("Please run the simulation first to generate tickers and weights.")
