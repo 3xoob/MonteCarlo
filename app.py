@@ -123,13 +123,10 @@ def main():
         expected_returns = portfolio.returns.mean() * 252
         covariance_matrix = portfolio.returns.cov() * 252
 
-        if investment_option == 'Use Weights and Initial Investment' and optimize:
-            optimizer = PortfolioOptimizer(expected_returns, covariance_matrix, risk_free_rate=risk_free_rate)
-            weights, sharpe = optimizer.optimize_weights(num_simulations=10000)
-            st.write(f"Optimized Portfolio Sharpe Ratio: {sharpe:.4f}")
-            display_optimal_weights(tickers, weights, streamlit_display=True)
-        else:
-            display_optimal_weights(tickers, weights, streamlit_display=True)
+        optimizer = PortfolioOptimizer(expected_returns, covariance_matrix, risk_free_rate=risk_free_rate)
+        weights, sharpe = optimizer.optimize_weights(num_simulations=10000)
+        st.write(f"Optimized Portfolio Sharpe Ratio: {sharpe:.4f}")
+        display_optimal_weights(tickers, weights, streamlit_display=True)
 
         simulation = MonteCarloSimulation(portfolio.returns, initial_investment, weights)
         all_cumulative_returns, final_portfolio_values = simulation.run_simulation(int(num_simulations), int(time_horizon))
