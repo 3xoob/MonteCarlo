@@ -24,12 +24,11 @@ def main():
     st.title('Portfolio Management with Monte Carlo Simulation')
 
     st.write("""
-    Welcome to the Portfolio Management application. Input your investment preferences below and run a Monte Carlo simulation to forecast potential portfolio performance.
-    """)
+        Welcome to the Portfolio Management Application. Define your investment preferences and utilize Monte Carlo simulations to project and analyze potential portfolio performance.
+        """)
 
     @st.cache_data
     def load_ticker_list():
-        st.write("Extracting tickers using the new method...")
         alpha_vantage_tickers = get_alpha_vantage_tickers()
         nasdaq_nyse_tickers = get_nasdaq_nyse_tickers()
         all_tickers = merge_tickers([alpha_vantage_tickers, nasdaq_nyse_tickers])
@@ -43,7 +42,6 @@ def main():
     selected_tickers = st.multiselect(
         'Select Stock Tickers:',
         options=ticker_list,
-        help='Type to search and select stock tickers.'
     )
 
     if not selected_tickers:
@@ -52,7 +50,7 @@ def main():
 
     col1, col2 = st.columns(2)
     with col1:
-        start_date = st.date_input('Start Date', value=pd.to_datetime('2020-01-01'), help='The start date for historical data.')
+        start_date = st.date_input('Start Date', value=pd.to_datetime('2014-01-01'), help='The start date for historical data.')
     with col2:
         end_date = st.date_input('End Date', value=pd.to_datetime(datetime.today() - relativedelta(days=1)), help='The end date for historical data.')
 
@@ -77,70 +75,23 @@ def main():
     weights = None
     initial_investment = 1000.0  # Default value
 
-    if investment_option == 'Use Weights and Initial Investment':
-        st.subheader('Weights and Initial Investment')
-        st.write('Input weights for each stock or choose to optimize the portfolio.')
 
         # Optimization Options
-        optimize = st.checkbox('Optimize Portfolio', value=False, help='Select to automatically calculate optimal weights for your portfolio.')
-        if optimize:
-            optimization_choice = st.selectbox(
-                'Optimization Strategy',
-                ('Maximize Sharpe Ratio', 'Balanced Portfolio'),
-                help='Choose an optimization strategy.'
-            )
-            balanced = (optimization_choice == 'Balanced Portfolio')
-            custom_weights = None
-        else:
-            balanced = False
-            # Create editable table for weights
-            st.write("Edit the weights for each stock below. The weights should sum to 1.0.")
-            default_weight = 1.0 / len(tickers)
-            weights_df = pd.DataFrame({
-                'Ticker': tickers,
-                'Weight': [default_weight] * len(tickers)
-            })
-            st.info('You can edit the weights in the table below. The weights should sum to 1.0.')
-            weights_df = st.data_editor(
-                weights_df,
-                num_rows="dynamic",
-                use_container_width=True,
-                key='weights_editor',
-            )
-            # Validate weights
-            total_weight = weights_df['Weight'].sum()
-            if abs(total_weight - 1.0) > 1e-6:
-                st.error(f'Total weights must sum to 1. Currently summing to {total_weight:.4f}')
-                st.stop()
-            weights = weights_df['Weight'].tolist()
+    optimize = st.write('Optimize Portfolio')
+    optimization_choice = st.selectbox(
+        'Optimization Strategy',
+        ('Maximize Sharpe Ratio', 'Balanced Portfolio'),
+        help='Choose an optimization strategy.'
+    )
+    balanced = (optimization_choice == 'Balanced Portfolio')
+    custom_weights = None
 
-        initial_investment = st.number_input(
-            'Initial Investment ($):',
-            value=1000.0,
-            min_value=0.0,
-            help='Total amount you plan to invest.'
-        )
-
-    else:
-        # Use Dollar Amounts per Stock
-        st.subheader('Dollar Amounts per Stock')
-        st.write('Input the dollar amount you wish to invest in each stock.')
-        amounts = []
-        for ticker in tickers:
-            amount = st.number_input(
-                f'Amount for {ticker} ($):',
-                value=100.0,
-                min_value=0.0,
-                help=f'Amount to invest in {ticker}.'
-            )
-            amounts.append(amount)
-        total_investment = sum(amounts)
-        if total_investment == 0:
-            st.error('Total investment cannot be zero.')
-            st.stop()
-        weights = [amount / total_investment for amount in amounts]
-        initial_investment = total_investment
-        optimize = False  # Disable optimization when dollar amounts are provided
+    initial_investment = st.number_input(
+        'Initial Investment ($):',
+        value=1000.0,
+        min_value=0.0,
+        help='Total amount you plan to invest.'
+    )
 
     # Input: Simulation Parameters
     st.header('3. Simulation Parameters')
