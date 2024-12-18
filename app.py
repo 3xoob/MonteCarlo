@@ -201,7 +201,8 @@ if __name__ == '__main__':
     main()
 
 
-# After weight optimization:
+from portfolio_management.data.data_loader import DataLoader
+data_loader = DataLoader()
 sector_data = data_loader.get_sector_data(tickers)
 sector_weights = {}
 for ticker, weight in zip(tickers, weights):

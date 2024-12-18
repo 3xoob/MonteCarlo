@@ -89,10 +89,11 @@ def get_simulation_insights(sim_results, initial_investment):
     }
     return insights
 
-def display_optimal_weights(tickers, weights, streamlit_display=False):
-    weights_df = pd.DataFrame({'Ticker': tickers, 'Weight': weights})
-    weights_df['Weight'] = weights_df['Weight'].map("{:.4f}".format)
+def display_optimal_weights(tickers, weights, streamlit_display=True):
+    if len(tickers) != len(weights):
+        raise ValueError("Tickers and Weights must have the same length.")
+    weights_df = pd.DataFrame({"Ticker": tickers, "Weight": weights})
     if streamlit_display:
+        st.write("### Optimal Portfolio Weights")
         st.table(weights_df)
-    else:
-        print(weights_df)
+    return weights_df
