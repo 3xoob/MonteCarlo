@@ -66,17 +66,11 @@ def main():
         step=0.01,
         help='The risk-free rate used for calculations, typically a treasury bond yield.'
     )
-    investment_option = st.radio(
-        'Choose Investment Input Option:',
-        ('Use Weights and Initial Investment', 'Use Dollar Amounts per Stock'),
-        help='Select how you want to input your investment allocations.'
-    )
+    st.write('Choose Investment Input Option: Use Weights and Initial Investment')
 
     weights = None
     initial_investment = 1000.0  # Default value
 
-
-        # Optimization Options
     optimize = st.write('Optimize Portfolio')
     optimization_choice = st.selectbox(
         'Optimization Strategy',
