@@ -95,3 +95,14 @@ def display_optimal_weights(tickers, weights, streamlit_display=True):
         st.write("### Optimal Portfolio Weights")
         st.table(weights_df)
     return weights_df
+
+
+
+
+def display_optimal_weights_custom(tickers, weights, streamlit_display=False):
+    weights_df = pd.DataFrame({'Ticker': tickers, 'Weight': weights})
+    weights_df['Weight'] = weights_df['Weight'].map("{:.4f}".format)
+    if streamlit_display:
+        st.table(weights_df)
+    else:
+        print(weights_df)
