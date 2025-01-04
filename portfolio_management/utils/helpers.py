@@ -90,8 +90,30 @@ def get_simulation_insights(sim_results, initial_investment):
     return insights
 
 def display_optimal_weights(tickers, weights, streamlit_display=True):
+    # Create a DataFrame for weights
     weights_df = pd.DataFrame({"Ticker": tickers, "Weight": weights})
+
     if streamlit_display:
-        st.write("### Optimal Portfolio Weights")
-        st.table(weights_df)
-    return weights_df
+        # Radio button for mode selection
+        mode = st.radio("Choose display mode:", ("Fixed", "Editable"))
+
+        if mode == "Fixed":
+            # Display the weights as a fixed table
+            st.write("### Optimal Portfolio Weights (Fixed)")
+            st.table(weights_df)
+        elif mode == "Editable":
+            # Allow user to edit the weights
+            st.write("### Optimal Portfolio Weights (Editable)")
+            edited_weights_df = st.data_editor(weights_df, key="weights_editor")
+            
+            # Validate edited weights
+            if st.button("Submit Edited Weights"):
+                total_weight = edited_weights_df["Weight"].sum()
+                if abs(total_weight - 1.0) > 0.01:  # Check if weights sum to 1
+                    st.error("Weights do not sum to 1. Please adjust the values.")
+                else:
+                    st.success("Edited weights submitted successfully!")
+                    st.write("Updated Portfolio Weights:", edited_weights_df)
+                    return edited_weights_df  # Return updated weights
+
+    return weights_df  # Return the original weights for Fixed mode
