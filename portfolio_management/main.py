@@ -6,8 +6,7 @@ from portfolio_management.monte_carlo.simulation import MonteCarloSimulation
 from portfolio_management.utils.helpers import (
     plot_simulation_results,
     print_simulation_insights,
-    display_optimal_weights,
-    display_optimal_weights_custom
+    display_optimal_weights
 )
 
 def main():
@@ -58,7 +57,7 @@ def main():
     elif custom_weights:
         weights = custom_weights
         print("\nUsing Custom Weights:")
-        display_optimal_weights_custom(stock_data.columns, weights)
+        display_optimal_weights(stock_data.columns, weights)
     else:
         num_assets = len(expected_returns)
         weights = [1.0 / num_assets] * num_assets
